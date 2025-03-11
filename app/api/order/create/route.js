@@ -2,7 +2,6 @@ import { inngest } from "@/config/inngest";
 import Product from "@/models/Product";
 import User from "@/models/User";
 import { getAuth } from "@clerk/nextjs/server";
-import { err } from "inngest/types";
 import { NextResponse } from "next/server";
 
 
@@ -12,7 +11,7 @@ export async function POST(request) {
     try {
 
         const { userId } = getAuth(request)
-        const { items, address } = await request.json()
+        const { address, items } = await request.json()
 
         if (!address || items.length === 0) {
             return NextResponse.json({ success: false, message: 'Invalid data' })
@@ -27,7 +26,7 @@ export async function POST(request) {
         
         await inngest.send({
             name: 'order/created',
-            date: {
+            data: {
                 userId,
                 address,
                 items,
