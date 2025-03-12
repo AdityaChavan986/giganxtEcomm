@@ -33,7 +33,7 @@ const Navbar = () => {
       <div className="flex items-center gap-4 lg:gap-8 max-md:hidden">
         {navItems.map((item) => (
           <Link key={item.path} href={item.path} className="flex flex-col items-center gap-1">
-            <p className={`hover:text-gray-900 transition ${pathname === item.path ? "font-semibold text-gray-900" : "text-gray-700"}`}>
+            <p className={`hover:text-gray-900 transition ${pathname === item.path ? " text-gray-900" : "text-gray-700"}`}>
               {item.name}
             </p>
             <hr className={`w-2/4 border-none h-[1.5px] bg-gray-700 transition-all duration-300 ${pathname === item.path ? "block" : "hidden"}`} />
