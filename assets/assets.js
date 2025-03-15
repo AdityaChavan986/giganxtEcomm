@@ -49,6 +49,7 @@ import product_details_page_apple_earphone_image5 from "./product_details_page_a
 import about_img from "./about_img.png";
 import contact_img from "./contact_img.png";
 
+
 export const assets = {
   logo,
   search_icon,
@@ -100,6 +101,7 @@ export const assets = {
   checkmark,
   about_img,
   contact_img
+  
 };
 
 export const BagIcon = () => {
