@@ -15,31 +15,65 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'processing':
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'shipped':
+                return 'bg-purple-100 text-purple-800 border-purple-200';
+            case 'delivered':
+                return 'bg-green-100 text-green-800 border-green-200';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800 border-red-200';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
     const fetchSellerOrders = async () => {
         try {
-
-            const token = await getToken()
-
+            const token = await getToken();
             const { data } = await axios.get(
                 '/api/order/seller-orders', 
                 { headers: { Authorization: `Bearer ${token}` } }
-            )
+            );
 
             if (data.success) {
-                setOrders(data.orders.reverse())
-                setLoading(false)
+                setOrders(data.orders.reverse());
+                setLoading(false);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-            
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
+    };
+
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            const token = await getToken();
+            const { data } = await axios.put(
+                '/api/order/update-status',
+                { orderId, status: newStatus },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (data.success) {
+                toast.success('Order status updated successfully');
+                fetchSellerOrders();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     useEffect(() => {
         if (user) {
-            fetchSellerOrders(); 
+            fetchSellerOrders();
         }
     }, [user]);
 
@@ -67,7 +101,7 @@ const Orders = () => {
                                 <p>
                                     <span className="font-medium">{order.address.fullName}</span>
                                     <br />
-                                    <span >{order.address.area}</span>
+                                    <span>{order.address.area}</span>
                                     <br />
                                     <span>{`${order.address.city}, ${order.address.state}`}</span>
                                     <br />
@@ -75,12 +109,24 @@ const Orders = () => {
                                 </p>
                             </div>
                             <p className="font-medium my-auto">{currency}{order.amount}</p>
-                            <div>
-                                <p className="flex flex-col">
-                                    <span>Method : COD</span>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between gap-4">
                                     <span>Date : {new Date(order.date).toLocaleDateString()}</span>
-                                    <span>Payment : Pending</span>
-                                </p>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
+                                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                    </span>
+                                </div>
+                                <select 
+                                    className={`border rounded p-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${getStatusColor(order.status)}`}
+                                    value={order.status}
+                                    onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
                             </div>
                         </div>
                     ))}
