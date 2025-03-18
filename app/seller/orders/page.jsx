@@ -15,6 +15,15 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Create a consistent date format function
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending':
@@ -111,7 +120,7 @@ const Orders = () => {
                             <p className="font-medium my-auto">{currency}{order.amount}</p>
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between gap-4">
-                                    <span>Date : {new Date(order.date).toLocaleDateString()}</span>
+                                    <span>Date : {formatDate(order.date)}</span>
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
                                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                     </span>

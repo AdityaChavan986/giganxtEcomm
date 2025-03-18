@@ -8,33 +8,37 @@ import Navbar from "@/components/Navbar";
 import Loading from "@/components/Loading";
 import axios from "axios";
 import toast from "react-hot-toast";
+import InvoiceButtonWrapper from "@/components/InvoiceButtonWrapper";
 
 const MyOrders = () => {
-
     const { currency, getToken, user } = useAppContext();
-
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchOrders = async () => {
-        
-        try {
-            
-            const token = await getToken()
+    // Create a consistent date format function
+    const formatDate = (timestamp) => {
+        const date = new Date(timestamp);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
 
-            const { data } = await axios.get('/api/order/list', { headers: { Authorization: `Bearer ${token}` } })
+    const fetchOrders = async () => {
+        try {
+            const token = await getToken();
+            const { data } = await axios.get('/api/order/list', { headers: { Authorization: `Bearer ${token}` } });
 
             if (data.success) {
-                setOrders(data.orders.reverse())
-                setLoading(false)
+                setOrders(data.orders.reverse());
+                setLoading(false);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
+    };
 
     useEffect(() => {
         if (user) {
@@ -129,7 +133,7 @@ const MyOrders = () => {
                                 <p className="font-medium my-auto">{currency}{order.amount}</p>
                                 <div className="flex flex-col gap-3">
                                     <div className="flex items-center justify-between gap-4">
-                                        <span className="text-gray-600">Date : {new Date(order.date).toLocaleDateString()}</span>
+                                        <span className="text-gray-600">Date : {formatDate(order.date)}</span>
                                         <div className="flex items-center gap-2">
                                             <span className="text-lg">{getStatusIcon(order.status)}</span>
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
@@ -149,6 +153,21 @@ const MyOrders = () => {
                                                     }`}
                                                     style={{ width: `${getOrderProgress(order.status)}%` }}
                                                 ></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {order.status === 'delivered' && (
+                                        <div className="mt-2">
+                                            <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-medium text-gray-700 mb-2">Your order has been delivered!</span>
+                                                    <div className="flex items-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        <InvoiceButtonWrapper order={order} currency={currency} />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
